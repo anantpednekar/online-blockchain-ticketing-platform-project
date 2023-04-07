@@ -8,6 +8,6 @@ app.get("/", (req, res) => {
 })
 
 
-const server = app.listen(3000);
+const server = app.listen(process.env.PORT);
 const portNumber = server.address().port;
 console.log(`port: ${portNumber}`);
