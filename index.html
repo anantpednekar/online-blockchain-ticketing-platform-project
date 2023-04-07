@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.7-rc.0/web3.min.js"></script>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        text-align: center;
+      }
+      th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+      }
+      th {
+        background-color: #f2f2f2;
+        color: #333;
+      }
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+    </style>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+      .loader {
+        border: 16px solid #f3f3f3; /* Light grey */
+        border-top: 16px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+    <meta charset="UTF-8">
+    <title>Sports Ticketing Platform</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script>
+      const adminWalletAddress = "0xca2649d23064D14D93348F5aaA8fFF1BcF34858b";//Account 3 
+      //const infuraEndpoint = 'https://mainnet.infura.io/v3/YOUR_PROJECT_ID';
+      const myHttpEndpoint = 'http://localhost:7545';
+      let account;
+      let web3Instance;
+      let ticketContract,contactUsContract;
+      let mytableHeader,mygreetHeader;
+      let myContactUsTag;
+      let myContactDiv,myQueriesDiv;
+      let myCreateEventDiv;
+      let totalQueries;
+      let jokeElement;
+
+      const connectMetamask = async () => {
+        if(!account){
+          if(window.ethereum !== "undefined") {
+              const accounts = await ethereum.request({method: "eth_requestAccounts"});
+              account = accounts[0];
+              console.log("Logged in account :"+account);
+              //console.log("admin :"+adminWalletAddress.toLowerCase());
+              if(account.toLowerCase() === adminWalletAddress.toLowerCase()){
+                alert("Admin Logging in");
+                myContactUsTag = document.getElementById('link-contactus-queries');
+                if(myContactUsTag){
+                  myContactUsTag.innerHTML = "Queries"
+                }
+                if(myCreateEventDiv){
+                  myCreateEventDiv.style.display = 'none';
+                }
+                sessionStorage.setItem("isAdmin", true);
+                sessionStorage.setItem('loggedInAccount',account);
+                 console.log("Session -  :"+sessionStorage.getItem("isAdmin"));
+              }else{
+                myContactUsTag = document.getElementById('link-contactus-queries');
+                sessionStorage.setItem('isAdmin', false);
+              }
+          }
+          //Show  Values table
+          mytableHeader = document.getElementById('ticket-table-jumbo');
+          mygreetHeader = document.getElementById('greet-jumbo');
+          myChuckNorrisDiv = document.getElementById('chuck-norris-div');
+          if (mytableHeader.style.display === 'none') {
+            mytableHeader.style.display = 'block';
+            mygreetHeader.style.display = 'none';
+            myChuckNorrisDiv.style.display = 'none'
+          } else {
+            mytableHeader.style.display = 'none';
+          }
+          connectTicketContract();
+          connectContactUsContract();
+        }else{
+          alert("Need to login")
+        }
+      }
+      
+      const connectTicketContract = async () => {
+          const ticketABI = [
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "string",
+                "name": "eventName",
+                "type": "string"
+              },
+              {
+                "indexed": false,
+                "internalType": "string",
+                "name": "venue",
+                "type": "string"
+              },
+              {
+                "indexed": false,
+                "internalType": "string",
+                "name": "date",
+                "type": "string"
+              },
+              {
+                "indexed": false,
+                "internalType": "string",
+                "name": "time",
+                "type": "string"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "price",
+                "type": "uint256"
+              },
+              {
+                "indexed": true,
+                "internalType": "address",
+                "name": "issuer",
+                "type": "address"
+              }
+            ],
+            "name": "TicketCreated",
+            "type": "event"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "_id",
+                "type": "uint256"
+              }
+            ],
+            "name": "buyTicket",
+            "outputs": [],
+            "stateMutability": "payable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "string",
+                "name": "_eventName",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "_venue",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "_date",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "_time",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "_price",
+                "type": "uint256"
+              }
+            ],
+            "name": "createTicket",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [],
+            "name": "getBalance",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "_id",
+                "type": "uint256"
+              }
+            ],
+            "name": "getTicket",
+            "outputs": [
+              {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+              },
+              {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [],
+            "name": "getTotalTickets",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+              }
+            ],
+            "name": "tickets",
+            "outputs": [
+              {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+              },
+              {
+                "internalType": "string",
+                "name": "eventName",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "venue",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "date",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "time",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "price",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "issuer",
+                "type": "address"
+              },
+              {
+                "internalType": "bool",
+                "name": "isAvailable",
+                "type": "bool"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          }
+        ];
+          const ticketAddress = "0x3AE9aEC6A49a22b5f22f9B371DB06cB0F3877295"; 
+          web3Instance = new Web3(myHttpEndpoint);
+          //const web3Instance = new Web3(new Web3.providers.HttpProvider(infuraEndpoint));
+          //const ticketContract = new web3Instance.eth.Contract(ticketABI, ticketAddress);
+          ticketContract = await new web3Instance.eth.Contract(ticketABI, ticketAddress);
+          getDataIntable();
+      }
+      
+      const connectContactUsContract = async () => {
+        const contactUsABI = [
+        {
+          "inputs": [
+            {
+              "internalType": "string",
+              "name": "content",
+              "type": "string"
+            }
+          ],
+          "name": "sendMessage",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "getMessage",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "getMessageCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "messages",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "content",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ];
+        const contactUsAddress = "0x8B9cef0Cf34eE957C5B3dE42b3F24aDb5C217151"; 
+        web3Instance = new Web3(myHttpEndpoint);
+        //const web3Instance = new Web3(new Web3.providers.HttpProvider(infuraEndpoint));
+        //const ticketContract = new web3Instance.eth.Contract(ticketABI, ticketAddress);
+        contactUsContract = await new web3Instance.eth.Contract(contactUsABI, contactUsAddress);
+      }
+      
+      const logoutMetamask = async () => {
+        if(account){
+          account = undefined;
+          sessionStorage.clear(); 
+          if(mytableHeader){
+            mytableHeader.style.display = 'none';
+          }
+          if(mygreetHeader){
+            mygreetHeader.style.display = 'block';
+          }
+          if(myContactDiv){
+            myContactDiv.style.display = 'none';
+          }
+          if(myQueriesDiv){
+            myQueriesDiv.style.display = 'none';
+          }
+          if(myQueriesDiv){
+            myContactUsTag.innerHTML = "Contact Us";
+          }
+          getJokeFromChuckNorris();
+          location.reload();
+        }else{
+          alert("Need to login first")
+        }
+      };
+
+      const getDataIntable = async () => {
+        const ticketTable = document.querySelector('#ticket-table tbody');
+        if (ticketTable) {
+          ticketTable.innerHTML = "";
+        }
+        totalTickets = await ticketContract.methods.getTotalTickets().call();
+        for (let i = 0; i < totalTickets; i++) {
+          temp = await ticketContract.methods.getTicket(i).call();
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${i+1}</td>
+            <td>${temp[0]}</td>
+            <td>${temp[1]}</td>
+            <td>${temp[2]}</td>
+            <td>${temp[3]}</td>
+            <td>${temp[4]}</td>
+            <td>${temp[5].substring(0, 10)}</td>
+            <td>${temp[6] ? '<button onclick="bookTicket(' + i + ')">Book Now</button>' : 'Sold Out'}</td>
+          `;
+          ticketTable.appendChild(row);
+        }
+      }
+
+      const createEventFunc = async () => {
+        if(account){
+          if(sessionStorage.getItem('loggedInAccount') === adminWalletAddress.toLowerCase()){
+            myCreateEventDiv = document.getElementById('createEventDiv');
+            if (myCreateEventDiv.style.display === 'none') {
+              myCreateEventDiv.style.display = 'block';
+            } else {
+              myCreateEventDiv.style.display = 'none';
+            }
+          }else{
+
+            alert("Event can only be created by Admin")
+          }
+        }else{
+          alert("Need to login first")
+        }
+      }
+
+      const createEventSubmitFunc = async () =>{
+        if(sessionStorage.getItem('loggedInAccount') === adminWalletAddress.toLowerCase()){
+          const eventNameInput = document.getElementById("eventName").value;
+          const venueInput = document.getElementById("venue").value;
+          const dateInput = document.getElementById("date").value;
+          const timeInput = document.getElementById("time").value;
+          const priceInput = document.getElementById("price").value;
+          const result = await ticketContract.methods.createTicket(eventNameInput, venueInput, dateInput, timeInput, priceInput).send({ from: account,gas: 250000 });
+          console.log(" createEventSubmitFunc account :"+account);
+          if (result.status) {
+            alert("Ticket created");
+            myCreateEventDiv.style.display = 'none';
+            getDataIntable();
+          } else {
+            alert('Transaction failed');
+          }
+        }else{
+          alert('You are not AdminUser');
+        }
+      }
+      
+      const bookTicket = async (id) =>{
+        try {
+          //transfere money
+          temp = await ticketContract.methods.getTicket(id).call();
+          let ticketAmount = temp[4];
+          console.log(" createEventSubmitFunc account :"+account);
+          console.log(ticketAmount);
+          //ticketAmount = web3Instance.utils.toWei(ticketAmount.toString(), "ether");
+          const result = await ticketContract.methods.buyTicket(id).send({ from: account , value: ticketAmount,gas: 250000});
+          console.log(result);
+          getDataIntable()
+        } catch (error) {
+          //alert('Transaction failed');
+          console.error(error);
+        }
+      }
+
+      const clickContactUs = async () =>{
+        if(account){
+          if(sessionStorage.getItem("isAdmin") === "true"){
+            console.log("inside admin")
+            myQueriesDiv = document.getElementById('QueriesDiv');
+            myQueriesDiv.style.display = 'block';
+            const queriesTable = document.querySelector('#tableQueries tbody');
+            if (queriesTable) {
+              queriesTable.innerHTML = "";
+            }
+            totalQueries = await contactUsContract.methods.getMessageCount().call();
+            for (let i = 0; i < totalQueries; i++) {
+              temp = await contactUsContract.methods.getMessage(i).call();
+              const row = document.createElement('tr');
+              const date = new Date( temp[1] * 1000);
+              const year = date.getFullYear();
+              const month = date.getMonth() + 1;
+              const day = date.getDate();
+              const hours = date.getHours();
+              const minutes = date.getMinutes();
+              const seconds = date.getSeconds();
+              const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+              row.innerHTML = `
+                <td>${temp[0].substring(0, 10)}</td>
+                <td>${formattedDate}</td>
+                <td>${temp[2]}</td>
+              `;
+              queriesTable.appendChild(row);
+            }
+            
+          }else{
+            console.log("inside nonadmin")
+            myContactDiv = document.getElementById('ContactUSDiv');
+            myContactDiv.style.display = 'block';
+          }
+        }else{
+          alert("Need to login")
+        }
+      }
+      
+      const submitContactUs = async () =>{
+        const myContactUsMsg = document.getElementById('ContactUsMessage');
+        const result = await contactUsContract.methods.sendMessage(myContactUsMsg.value).send({ from: account,gas: 250000 });
+        console.log(result);
+        alert("Submitted");
+        if(myContactDiv){
+          myContactDiv.style.display = 'none'
+        }
+
+      }
+  
+      document.addEventListener('DOMContentLoaded', () => {
+        // Get a reference to the HTML element to update
+        getJokeFromChuckNorris();
+      });
+
+      const getJokeFromChuckNorris = async () =>{
+        jokeElement = document.getElementById('joke');
+        if(jokeElement){
+          jokeElement.innerHTML="";
+        // Make a GET request to the Chuck Norris API
+        fetch('https://api.chucknorris.io/jokes/random')
+          .then(response => response.json())
+          .then(data => {
+            // Update the HTML element with the joke text
+            jokeElement.textContent = data.value;
+          });
+        }
+      }
+
+    </script>
+  </head>
+  <body>
+    <header>
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" >Sports Ticketing Platform</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" id="link-contactus-queries" onclick="clickContactUs()">Contact Us</a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <button onclick="createEventFunc()" class="btn btn-light"> Create Event </button>
+              <button onclick="connectMetamask()" class="btn btn-light"> Login </button>
+              <button onclick="logoutMetamask()" class="btn btn-light"> Logout </button>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+    <main role="main" class="container">
+
+      <div class="jumbotron" id="ContactUSDiv" style="display:none;">
+        <br><br>
+        <div class="container">
+          <h2>Submit the below form</h2>
+          <div class="form-group"></div>
+            <label for="message">Message:</label>
+            <input type="text" class="form-control" id="ContactUsMessage" name="message" required /><br>
+            <button type="submit" onclick="submitContactUs()" class="btn btn-primary">Submit Message</button>
+          </div>
+        </div>
+        <br><br>
+      </div>
+
+
+      <div class="jumbotron" id="QueriesDiv" style="display:none;">
+        <br><br>
+        <h2>Queries by Users</h2>
+        <table id="tableQueries" style="margin: 0 auto;">
+          <thead>
+            <tr>
+              <th>Sender</th>
+              <th>Time</th>
+              <th>Message</th>
+            </tr>
+          </thead>
+          <tbody id="Queriestbody">
+            
+          </tbody>
+        </table>
+        <br><br>
+      </div>
+
+      <div class="jumbotron" id="chuck-norris-div">
+        <h3>Chuck Norris says,</h3>
+        <p id="joke" style="font-style: italic"></p>
+      </div>
+      
+
+      <div class="jumbotron" id="greet-jumbo"> 
+        <h1>Bonjour,</h1>
+        <h2>Please login to continue</h2>
+        <div class="container d-flex justify-content-center align-items-center">
+          <div class="row">
+            <div class="col-sm-12 text-center">
+              <div class="loader"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+
+      <div class="jumbotron" id="ticket-table-jumbo" style="display:none;">
+        <h2>Events</h2>
+        <table id="ticket-table" style="margin: 0 auto;">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Event Name</th>
+              <th>Venue</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Price(Wei)</th>
+              <th>Owner</th>
+              <th>Availability</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            
+          </tbody>
+        </table>
+      </div>
+
+      <div class="jumbotron" id="createEventDiv" style="display:none;">
+        <div class="container">
+          <h2>Create Event Ticket</h2>
+            <div class="form-group">
+              <label for="eventName">Event Name:</label>
+              <input type="text" class="form-control" id="eventName">
+            </div>
+            <div class="form-group">
+              <label for="venue">Venue:</label>
+              <input type="text" class="form-control" id="venue">
+            </div>
+            <div class="form-group">
+              <label for="date">Date:</label>
+              <input type="date" class="form-control" id="date">
+            </div>
+            <div class="form-group">
+              <label for="time">Time:</label>
+              <input type="time" class="form-control" id="time">
+            </div>
+            <div class="form-group">
+              <label for="price">Price:</label>
+              <input type="number" class="form-control" id="price">
+            </div>
+            <button type="submit" onclick="createEventSubmitFunc()" class="btn btn-primary">Create Ticket</button>
+        </div>
+      </div>
+    </main>
+    <footer class="container">
+    </footer>
+  </body>
+</html>
