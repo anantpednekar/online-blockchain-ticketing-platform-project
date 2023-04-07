@@ -56,6 +56,7 @@
       let myCreateEventDiv;
       let totalQueries;
       let jokeElement;
+      let ticketAddress,contactUsAddress;
 
       const connectMetamask = async () => {
         if(!account){
@@ -326,7 +327,7 @@
             "type": "function"
           }
         ];
-          const ticketAddress = "0x954CCb01c8830fD706bdf9E8D6f7B7c5af7783d0"; 
+          ticketAddress = "0x954CCb01c8830fD706bdf9E8D6f7B7c5af7783d0"; 
           web3Instance = new Web3(new Web3.providers.HttpProvider(myHttpEndpoint));
           //const web3Instance = new Web3(new Web3.providers.HttpProvider(infuraEndpoint));
           //const ticketContract = new web3Instance.eth.Contract(ticketABI, ticketAddress);
@@ -421,7 +422,7 @@
           "type": "function"
         }
       ];
-        const contactUsAddress = "0x3d9a9Ecb3D8c8445aa5e9c67a439e9f63687f2f9"; 
+        contactUsAddress = "0x3d9a9Ecb3D8c8445aa5e9c67a439e9f63687f2f9"; 
         web3Instance = new Web3(myHttpEndpoint);
         //const web3Instance = new Web3(new Web3.providers.HttpProvider(infuraEndpoint));
         //const ticketContract = new web3Instance.eth.Contract(ticketABI, ticketAddress);
