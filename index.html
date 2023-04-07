@@ -504,8 +504,6 @@
           const timeInput = document.getElementById("time").value;
           const priceInput = document.getElementById("price").value;
 
-
-          //const result = await ticketContract.methods.createTicket(eventNameInput, venueInput, dateInput, timeInput, priceInput).send({ from: account,gas: 3000000 });
           const txObject = {
             from: account,
             to: ticketAddress,
@@ -513,11 +511,8 @@
             };
           // Send the transaction with a prompt in MetaMask
           const txHash = await ethereum.request({ method: 'eth_sendTransaction', params: [txObject] });
-          console.log('Transaction sent:', txHash);
-
-
-          console.log(" createEventSubmitFunc account :"+account);
-          if (result.status) {
+          const txReceipt = await web3Instance.eth.getTransactionReceipt(txHash);
+          if (txReceipt && txReceipt.status) {
             alert("Ticket created");
             myCreateEventDiv.style.display = 'none';
             getDataIntable();
@@ -534,11 +529,16 @@
           //transfere money
           temp = await ticketContract.methods.getTicket(id).call();
           let ticketAmount = temp[4];
-          console.log(" createEventSubmitFunc account :"+account);
-          console.log(ticketAmount);
-          //ticketAmount = web3Instance.utils.toWei(ticketAmount.toString(), "ether");
-          const result = await ticketContract.methods.buyTicket(id).send({ from: account , value: ticketAmount,gas: 250000});
-          console.log(result);
+          const txObject = {
+            from: account,
+            to: ticketAddress,
+            data: ticketContract.methods.buyTicket(id).encodeABI(),
+            value: ticketAmount,
+          };
+          
+          const txHash = await ethereum.request({ method: 'eth_sendTransaction', params: [txObject] });
+          const txReceipt = await web3Instance.eth.getTransactionReceipt(txHash);
+          console.log(txReceipt.status);
           getDataIntable()
         } catch (error) {
           //alert('Transaction failed');
@@ -588,13 +588,18 @@
       
       const submitContactUs = async () =>{
         const myContactUsMsg = document.getElementById('ContactUsMessage');
-        const result = await contactUsContract.methods.sendMessage(myContactUsMsg.value).send({ from: account,gas: 250000 });
-        console.log(result);
+        const txObject = {
+          from: account,
+          to: contactUsAddress,
+          data: contactUsContract.methods.sendMessage(myContactUsMsg.value).encodeABI(),
+        };
+        const txHash = await ethereum.request({ method: 'eth_sendTransaction', params: [txObject] });
+        const txReceipt = await web3Instance.eth.getTransactionReceipt(txHash);
+
         alert("Submitted");
         if(myContactDiv){
           myContactDiv.style.display = 'none'
         }
-
       }
   
       document.addEventListener('DOMContentLoaded', () => {
