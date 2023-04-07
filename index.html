@@ -513,13 +513,9 @@
           const txHash = await ethereum.request({ method: 'eth_sendTransaction', params: [txObject] });
           console.log(txHash);
           const txReceipt = await web3Instance.eth.getTransactionReceipt(txHash);
-          if (txReceipt) {
-            alert("Ticket created");
-            myCreateEventDiv.style.display = 'none';
-            getDataIntable();
-          } else {
-            alert('Transaction failed');
-          }
+          alert("Ticket created");
+          myCreateEventDiv.style.display = 'none';
+          getDataIntable();
         }else{
           alert('You are not AdminUser');
         }
