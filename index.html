@@ -327,7 +327,7 @@
           }
         ];
           const ticketAddress = "0x954CCb01c8830fD706bdf9E8D6f7B7c5af7783d0"; 
-          web3Instance = new Web3(myHttpEndpoint);
+          web3Instance = new Web3(new Web3.providers.HttpProvider(myHttpEndpoint));
           //const web3Instance = new Web3(new Web3.providers.HttpProvider(infuraEndpoint));
           //const ticketContract = new web3Instance.eth.Contract(ticketABI, ticketAddress);
           ticketContract = await new web3Instance.eth.Contract(ticketABI, ticketAddress);
