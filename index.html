@@ -511,8 +511,9 @@
             };
           // Send the transaction with a prompt in MetaMask
           const txHash = await ethereum.request({ method: 'eth_sendTransaction', params: [txObject] });
+          console.log(txHash);
           const txReceipt = await web3Instance.eth.getTransactionReceipt(txHash);
-          if (txReceipt && txReceipt.status) {
+          if (txReceipt) {
             alert("Ticket created");
             myCreateEventDiv.style.display = 'none';
             getDataIntable();
