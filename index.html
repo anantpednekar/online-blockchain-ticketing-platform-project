@@ -509,7 +509,7 @@
           const txObject = {
             from: account,
             to: ticketAddress,
-            gas: 3000000,
+            gas: '3000000',
             data: ticketContract.methods.createTicket(eventNameInput, venueInput, dateInput, timeInput, priceInput).encodeABI()
             };
             
