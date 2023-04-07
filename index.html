@@ -535,7 +535,7 @@
           
           const txHash = await ethereum.request({ method: 'eth_sendTransaction', params: [txObject] });
           const txReceipt = await web3Instance.eth.getTransactionReceipt(txHash);
-          console.log(txReceipt.status);
+
           getDataIntable()
         } catch (error) {
           //alert('Transaction failed');
@@ -592,7 +592,6 @@
         };
         const txHash = await ethereum.request({ method: 'eth_sendTransaction', params: [txObject] });
         const txReceipt = await web3Instance.eth.getTransactionReceipt(txHash);
-
         alert("Submitted");
         if(myContactDiv){
           myContactDiv.style.display = 'none'
