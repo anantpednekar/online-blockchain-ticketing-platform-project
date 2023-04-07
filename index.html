@@ -496,13 +496,27 @@
       }
 
       const createEventSubmitFunc = async () =>{
-        if(sessionStorage.getItem('loggedInAccount') === adminWalletAddress.toLowerCase()){
+        if(account === adminWalletAddress.toLowerCase()){
           const eventNameInput = document.getElementById("eventName").value;
           const venueInput = document.getElementById("venue").value;
           const dateInput = document.getElementById("date").value;
           const timeInput = document.getElementById("time").value;
           const priceInput = document.getElementById("price").value;
-          const result = await ticketContract.methods.createTicket(eventNameInput, venueInput, dateInput, timeInput, priceInput).send({ from: account,gas: 250000 });
+
+
+          //const result = await ticketContract.methods.createTicket(eventNameInput, venueInput, dateInput, timeInput, priceInput).send({ from: account,gas: 3000000 });
+          const txObject = {
+            from: account,
+            to: ticketAddress,
+            gas: 3000000,
+            data: ticketContract.methods.createTicket(eventNameInput, venueInput, dateInput, timeInput, priceInput).encodeABI()
+            };
+            
+          // Send the transaction with a prompt in MetaMask
+          const txHash = await ethereum.request({ method: 'eth_sendTransaction', params: [txObject] });
+          console.log('Transaction sent:', txHash);
+
+
           console.log(" createEventSubmitFunc account :"+account);
           if (result.status) {
             alert("Ticket created");
