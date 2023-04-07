@@ -24,7 +24,6 @@
         background-color: #f9f9f9;
       }
     </style>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
       .loader {
         border: 16px solid #f3f3f3; /* Light grey */
@@ -45,9 +44,9 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script>
-      const adminWalletAddress = "0xca2649d23064D14D93348F5aaA8fFF1BcF34858b";//Account 3 
-      //const infuraEndpoint = 'https://mainnet.infura.io/v3/YOUR_PROJECT_ID';
-      const myHttpEndpoint = 'http://localhost:7545';
+      const adminWalletAddress = "0xfB9bA32DeC1f853CD077Ae237567673a97B5389D";//Account 1
+      const infuraEndpoint = 'https://sepolia.infura.io/v3/3e6543e61ed3405f97de61f7b029e82f';
+      const myHttpEndpoint = infuraEndpoint;
       let account;
       let web3Instance;
       let ticketContract,contactUsContract;
@@ -327,7 +326,7 @@
             "type": "function"
           }
         ];
-          const ticketAddress = "0x3AE9aEC6A49a22b5f22f9B371DB06cB0F3877295"; 
+          const ticketAddress = "0x954CCb01c8830fD706bdf9E8D6f7B7c5af7783d0"; 
           web3Instance = new Web3(myHttpEndpoint);
           //const web3Instance = new Web3(new Web3.providers.HttpProvider(infuraEndpoint));
           //const ticketContract = new web3Instance.eth.Contract(ticketABI, ticketAddress);
@@ -337,19 +336,6 @@
       
       const connectContactUsContract = async () => {
         const contactUsABI = [
-        {
-          "inputs": [
-            {
-              "internalType": "string",
-              "name": "content",
-              "type": "string"
-            }
-          ],
-          "name": "sendMessage",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
         {
           "inputs": [
             {
@@ -420,9 +406,22 @@
           ],
           "stateMutability": "view",
           "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "string",
+              "name": "content",
+              "type": "string"
+            }
+          ],
+          "name": "sendMessage",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
         }
       ];
-        const contactUsAddress = "0x8B9cef0Cf34eE957C5B3dE42b3F24aDb5C217151"; 
+        const contactUsAddress = "0x3d9a9Ecb3D8c8445aa5e9c67a439e9f63687f2f9"; 
         web3Instance = new Web3(myHttpEndpoint);
         //const web3Instance = new Web3(new Web3.providers.HttpProvider(infuraEndpoint));
         //const ticketContract = new web3Instance.eth.Contract(ticketABI, ticketAddress);
