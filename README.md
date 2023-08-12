@@ -11,18 +11,18 @@
 
 ##Requirements
 - You will have to deploy the contracts and update the addresses accordingly in the index.js file
-'''bash
+```bash
 npm install
-'''
+```
 
 ##Getting Starting
 
-'''bash
+   ```bash
 git clone https://github.com/anantpednekar-nci/x21188947-blockchain-project.git
 cd x21188947-blockchain-project
-'''
+```
 
 ##Running app
-'''bash
+   ```bash
 node index.js
-'''
+```
