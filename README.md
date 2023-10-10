@@ -18,8 +18,8 @@ npm install
 ## Getting Starting
 
    ```bash
-git clone https://github.com/anantpednekar-nci/x21188947-blockchain-project.git
-cd x21188947-blockchain-project
+git clone https://github.com/anantpednekar/online-blockchain-ticketing-platform-project.git
+cd online-blockchain-ticketing-platform-project
 ```
 
 ## Running app
